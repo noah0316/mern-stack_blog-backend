@@ -11,10 +11,10 @@ import Admin from '../../model/admin';
 */
 export const register = async ctx => {
   // Request body 검증용 schema
-  const schema = Joi.object.apply().keys({
+  const schema = Joi.object.keys({
     name: Joi.string().min(2).max(4).required(),
     email: Joi.string.email().required(),
-    password: Joi.string().min(8).required,
+    password: Joi.string().min(8).required(),
   });
 
   const result = schema.validate(ctx.request.body);
