@@ -9,6 +9,8 @@ import Admin from '../../model/admin';
     password: 'password1234'
   }
 */
+
+// 회원가입
 export const register = async ctx => {
   // Request body 검증용 schema
   const schema = Joi.object.keys({
@@ -45,8 +47,8 @@ export const register = async ctx => {
   }
 };
 
-// 로그인
 // POST /api/auth/login
+// 로그인
 export const login = async ctx => {
   // Request body 검증용 schema
   const schema = Joi.object().keys({
@@ -79,4 +81,14 @@ export const login = async ctx => {
   } catch (e) {
     ctx.throw(500, e);
   }
+};
+
+// POST /api/auth/check
+export const check = async ctx => {
+  // 로그인 상태 확인
+};
+
+// POST /api/auth/logout
+export const logout = async ctx => {
+  // 로그아웃
 };
