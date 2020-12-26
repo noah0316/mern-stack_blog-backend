@@ -1,5 +1,6 @@
-import Joi from 'joi';
 import Admin from '../../model/admin';
+import Joi from 'joi';
+import * as jwt from 'jsonwebtoken';
 
 /*
   // POST /api/auth/register
@@ -13,9 +14,9 @@ import Admin from '../../model/admin';
 // 회원가입
 export const register = async ctx => {
   // Request body 검증용 schema
-  const schema = Joi.object.keys({
+  const schema = Joi.object().keys({
     name: Joi.string().min(2).max(4).required(),
-    email: Joi.string.email().required(),
+    email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
   });
 
@@ -52,7 +53,7 @@ export const register = async ctx => {
 export const login = async ctx => {
   // Request body 검증용 schema
   const schema = Joi.object().keys({
-    email: Joi.string.email().required(),
+    email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
   });
 
@@ -67,17 +68,24 @@ export const login = async ctx => {
 
   try {
     const admin = await Admin.findOne({ email });
-    const valid = await admin.checkPassword(password);
 
-    // 해당 email을 가진 admin이 존재하지 않거나
-    // 비밀번호가 일치하지 않으면
-    if (!admin || !valid) {
+    if (!admin) {
       ctx.status = 401; // Unauthorized
-      ctx.body = 'Email is not exist or password is not match.';
+      ctx.body = 'Wrong Email';
       return;
     }
 
+    const valid = await admin.checkPassword(password);
+
+    if (!valid) {
+      ctx.status = 401; // Unauthorized
+      ctx.body = 'Wrong Password';
+      return;
+    }
+    console.log(admin);
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     ctx.body = admin.serialize();
+    return token;
   } catch (e) {
     ctx.throw(500, e);
   }

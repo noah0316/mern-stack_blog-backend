@@ -1,5 +1,5 @@
-import { model, Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
+import { Schema, model } from 'mongoose';
 
 const AdminSchema = new Schema({
   name: { type: String, required: true },
@@ -14,7 +14,7 @@ AdminSchema.methods.setPassword = async function (password) {
 };
 
 AdminSchema.methods.checkPassword = async function (password) {
-  const result = await bcrypt.compare(password, this.pw);
+  const result = await bcrypt.compare(password, this.hashedPassword);
   return result; // true / false
 };
 

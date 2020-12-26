@@ -1,6 +1,9 @@
 import Koa from 'koa';
+import bodyparser from 'koa-bodyparser';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import Router from 'koa-router';
+import api from './api';
 
 dotenv.config();
 
@@ -13,6 +16,7 @@ if (!MONGO_URI) {
 async function connectDB() {
   try {
     await mongoose.connect(MONGO_URI, {
+      useCreateIndex: true,
       useNewUrlParser: true,
       useFindAndModify: false,
       useUnifiedTopology: true,
@@ -25,11 +29,11 @@ async function connectDB() {
 connectDB();
 
 const app = new Koa();
+const router = new Router();
 
-// response
-app.use(ctx => {
-  ctx.body = 'Hello Koa';
-});
+router.use('/api', api.routes());
+app.use(bodyparser());
+app.use(router.routes());
 
 const port = PORT || 4000;
 app.listen(port, () => {
