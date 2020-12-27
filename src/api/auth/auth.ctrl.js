@@ -83,9 +83,7 @@ export const login = async ctx => {
       return;
     }
     console.log(admin);
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    ctx.body = admin.serialize();
-    return token;
+    ctx.body = admin.generateToken();
   } catch (e) {
     ctx.throw(500, e);
   }
@@ -93,7 +91,14 @@ export const login = async ctx => {
 
 // POST /api/auth/check
 export const check = async ctx => {
-  // 로그인 상태 확인
+  const { admin } = ctx.state;
+
+  if (!admin) {
+    // 로그인 중 아님
+    ctx.status = 401; // Unauthorized
+    return;
+  }
+  ctx.body = admin;
 };
 
 // POST /api/auth/logout
