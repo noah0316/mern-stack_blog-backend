@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
 import { Schema, model } from 'mongoose';
 
 const AdminSchema = new Schema({
@@ -22,6 +23,19 @@ AdminSchema.methods.serialize = function () {
   const data = this.toJSON();
   delete data.hashedPassword;
   return data;
+};
+
+AdminSchema.methods.generateToken = function () {
+  const token = jwt.sign(
+    {
+      id: this.id,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '7d', // 7 days
+    },
+  );
+  return token;
 };
 
 const Admin = model('Admin', AdminSchema);
