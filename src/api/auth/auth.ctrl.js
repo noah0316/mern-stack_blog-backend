@@ -92,12 +92,6 @@ export const login = async ctx => {
 // POST /api/auth/check
 export const check = async ctx => {
   const { admin } = ctx.state;
-
-  if (!admin) {
-    // 로그인 중 아님
-    ctx.status = 401; // Unauthorized
-    return;
-  }
   ctx.body = admin;
 };
 
