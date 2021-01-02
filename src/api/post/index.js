@@ -9,3 +9,5 @@ post.get('/:id', Post.read);
 post.delete('/:id', Post.remove);
 post.patch('/:id', Post.update);
 post.patch('/:id:views', Post.viewUpdate);
+
+export default post;

@@ -1,3 +1,4 @@
+import Joi from 'joi';
 import Post from '../../model/post';
 
 /* 포스트 작성
@@ -5,15 +6,33 @@ POST /api/posts
 { title, body }
 */
 export const write = async ctx => {
-  const { author, title, content } = ctx.request.body;
+  // Request body 검증
+
+  const schema = Joi.object({
+    title: Joi.string().required(),
+    content: Joi.string(),
+  });
+  const result = schema.validate(ctx.request.body);
+
+  if (result.error) {
+    ctx.status = 400; // Bad request
+    ctx.body = result.error;
+    return;
+  }
+
+  const { title, content } = ctx.request.body;
+  const { admin } = ctx.state;
+
   try {
     const post = new Post({
-      author,
       title,
       content,
+      author: admin.id,
     });
     await post.save();
-    ctx.body = post;
+
+    const data = post.toJSON();
+    ctx.body = data;
   } catch (e) {
     ctx.throw(500, e);
   }
@@ -24,7 +43,7 @@ GET /api/posts
 */
 export const list = async ctx => {
   try {
-    const posts = await Post.find().exec();
+    const posts = await Post.find({}).populate('author', 'name');
     ctx.body = posts;
   } catch (e) {
     ctx.throw(500, e);
@@ -37,7 +56,7 @@ GET /api/posts/:id
 export const read = async ctx => {
   const { id } = ctx.params;
   try {
-    const post = await Post.findById(id).exec();
+    const post = await (await Post.findById(id)).populated('author', '-hashedPassword');
     if (!post) {
       ctx.status = 404;
       return;
