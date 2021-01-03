@@ -7,7 +7,6 @@ POST /api/posts
 */
 export const write = async ctx => {
   // Request body 검증
-
   const schema = Joi.object({
     title: Joi.string().required(),
     content: Joi.string(),
@@ -73,7 +72,7 @@ DELETE /api/posts/:id
 export const remove = async ctx => {
   const { id } = ctx.params;
   try {
-    await Post.findByIdAndRemove(id).exec();
+    await Post.findByIdAndRemove(id);
     ctx.status = 204;
   } catch (e) {
     ctx.throw(500, e);
@@ -85,15 +84,20 @@ PATCH /api/posts/:id
 { title, body }
 */
 export const update = async ctx => {
+  const schema = Joi.object({
+    title: Joi.string().required(),
+    content: Joi.string(),
+  });
+  const result = schema.validate(ctx.request.body);
+
+  if (result.error) {
+    ctx.status = 400; // Bad request
+    ctx.body = result.error;
+    return;
+  }
   const { id } = ctx.params;
   try {
-    const post = await Post.findByIdAndUpdate(id, ctx.request.body, {
-      new: true,
-    }).exec();
-    if (!post) {
-      ctx.status = 404;
-      return;
-    }
+    const post = await Post.findByIdAndUpdate(id, { ...ctx.request.body }, { new: true });
     ctx.body = post;
   } catch (e) {
     ctx.throw(500, e);
